@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum userStatus {
+  ACTIVE
+  INACTIVE
+  BAN
+}
+
+enum bookingStatus {
+  PAID
+  FAILED
+  CANCEL
+  REJECT
+  REFUND
+}
+
+enum eventType {
+  PAID
+  FREE
+}
+
+enum EventStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+}
+
+enum EventCategory {
+  MUSIC
+  SPORTS
+  EDUCATION
+  TECHNOLOGY
+  FESTIVAL
+  OTHER
+}
+
+enum AuthProvider {
+  GOOGLE
+  APPLE
+  CREDENTIAL
+}
+
+model User {
+  userId       String       @id @default(uuid())
+  username     String
+  email        String       @unique
+  password     String
+  profile      String?
+  refreshToken String?
+  otp          String?
+  role         UserRole     @default(USER)
+  status       userStatus   @default(ACTIVE)
+  provider     AuthProvider @default(CREDENTIAL)
+
+  bookings booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  eventId String @id @default(ulid())
+
+  // Basic Info
+  title     String
+  category  EventCategory
+  eventType eventType
+  thumbnail String?
+
+  // Date & Time
+  eventDate DateTime
+  startTime String
+  endTime   String?
+  duration  String?
+
+  // Pricing & Capacity
+  price          Int
+  capacity       Int
+  availableSeats Int
+
+  // Location Info
+  venueName String
+  address   String
+  city      String
+  latitude  Float
+  longitude Float
+
+  // Description Sections
+  about              String // About This Event
+  whatToExpect       String // What to Expect
+  cancellationPolicy String?
+
+  // Additional Info
+  ageLimit String?
+
+  // Highlights (bullet points)
+  highlights String[]
+
+  // Status
+  status EventStatus @default(ACTIVE)
+
+  // Relations
+  bookings booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([city])
+  @@map("events")
+}
+
+model booking {
+  bookingId String        @id @default(uuid())
+  userId    String
+  eventId   String
+  user      User          @relation(fields: [userId], references: [userId])
+  event     Event         @relation(fields: [eventId], references: [eventId])
+  status    bookingStatus
+  price     Int
+  quentity  Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
