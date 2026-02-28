@@ -1,25 +1,47 @@
 import { registerAs } from '@nestjs/config';
 
 export interface IEnv {
-    // Example
-    //   MONGO_URI: string;
-    //   PORT: number;
-    //   DEV_ENVIRONMENT: string;
-    //   FRONTEND_URL: string;
-    //   OPEN_AI_API_SECRATE: string;
-    //   AI_ROOT_URL: string;
-    //   SERVER_URL: string;
+    nodeEnv: string;
+    port: number;
+    apiPrefix: string;
+    appName: string;
+    appUrl: string;
 
-    //   JWT: {
-    //     JWT_ACCESS_SECRATE: string;
-    //     JWT_REFRESH_SECRATE: string;
-    //   };
+    databaseUrl: string;
+    databasePoolMin: number;
+    databasePoolMax: number;
+
+    jwtSecret: string;
+    jwtRefreshSecret: string;
+
+    cloudinaryCloudName: string;
+    cloudinaryApiKey: string;
+    cloudinaryApiSecret: string;
+
+    OTP: {
+        SMTP_HOST: string,
+        SMTP_PORT: string,
+        SMTP_USER: string,
+        SMTP_PASS: string
+    }
+
 }
 
 const requiredEnv = [
-
+    'NODE_ENV',
+    'PORT',
+    'API_PREFIX',
+    'APP_NAME',
+    'APP_URL',
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'JWT_REFRESH_SECRET',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USER',
+    'SMTP_PASS'
 ];
-// env Checker
+
 function envChecker() {
     requiredEnv.forEach((key) => {
         if (!process.env[key]) {
@@ -32,16 +54,29 @@ export default registerAs('env', (): IEnv => {
     envChecker();
 
     return {
+        nodeEnv: process.env.NODE_ENV as string,
+        port: parseInt(process.env.PORT as string, 10),
+        apiPrefix: process.env.API_PREFIX as string,
+        appName: process.env.APP_NAME as string,
+        appUrl: process.env.APP_URL as string,
 
-        // example
-        // STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY!,
-        // STRIPT_PUBLISHABLE_KEY: process.env.STRIPT_PUBLISHABLE_KEY!,
-        // STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET!,
+        databaseUrl: process.env.DATABASE_URL as string,
+        databasePoolMin: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
+        databasePoolMax: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
 
-        // JWT: {
-        //   JWT_ACCESS_SECRATE: process.env.JWT_ACCESS_SECRATE!,
-        //   JWT_REFRESH_SECRATE: process.env.JWT_REFRESH_SECRATE!,
-        // },
+        jwtSecret: process.env.JWT_SECRET as string,
+        jwtRefreshSecret: process.env.JWT_REFRESH_SECRET as string,
+
+        cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME as string,
+        cloudinaryApiKey: process.env.CLOUDINARY_API_KEY as string,
+        cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET as string,
+
+        OTP: {
+            SMTP_HOST: process.env.SMTP_HOST as string,
+            SMTP_PORT: process.env.SMTP_PORT as string,
+            SMTP_USER: process.env.SMTP_USER as string,
+            SMTP_PASS: process.env.SMTP_PASS as string
+        }
 
     };
 });

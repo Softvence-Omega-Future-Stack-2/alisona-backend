@@ -54,9 +54,10 @@ enum AuthProvider {
 
 model User {
   userId       String       @id @default(uuid())
-  username     String
+  username     String?
+  firebaseUid  String?
   email        String       @unique
-  password     String
+  password     String?
   profile      String?
   refreshToken String?
   otp          String?
