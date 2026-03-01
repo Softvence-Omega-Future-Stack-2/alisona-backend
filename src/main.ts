@@ -16,12 +16,12 @@ import { Redis } from 'ioredis';
 let apm: any;
 try {
   apm = require('elastic-apm-node');
-} catch {}
+} catch { }
 
 let RedisStore: any;
 try {
   RedisStore = require('rate-limit-redis');
-} catch {}
+} catch { }
 
 async function getAvailablePort(startPort: number, maxAttempts = 10): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -145,7 +145,11 @@ export async function bootstrap() {
 
   setupSecurity(app, configService, nodeEnv);
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 

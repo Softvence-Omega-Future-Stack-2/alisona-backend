@@ -76,10 +76,11 @@ model Event {
   eventId String @id @default(ulid())
 
   // Basic Info
-  title     String
-  category  EventCategory
-  eventType eventType
-  thumbnail String?
+  title       String
+  category    String?
+  eventType   eventType
+  thumbnail   String?
+  description String
 
   // Date & Time
   eventDate DateTime
@@ -90,7 +91,7 @@ model Event {
   // Pricing & Capacity
   price          Int
   capacity       Int
-  availableSeats Int
+  availableSeats Int?
 
   // Location Info
   venueName String
