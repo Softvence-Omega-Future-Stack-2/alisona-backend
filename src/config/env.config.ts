@@ -13,7 +13,7 @@ export interface IEnv {
 
     jwtSecret: string;
     jwtRefreshSecret: string;
-
+    jwtVerifyOtpTokenSectate: string
     cloudinaryCloudName: string;
     cloudinaryApiKey: string;
     cloudinaryApiSecret: string;
@@ -36,10 +36,11 @@ const requiredEnv = [
     'DATABASE_URL',
     'JWT_SECRET',
     'JWT_REFRESH_SECRET',
+    'JWT_VERIFY_OTP_SECRATE',
     'SMTP_HOST',
     'SMTP_PORT',
     'SMTP_USER',
-    'SMTP_PASS'
+    'SMTP_PASS',
 ];
 
 function envChecker() {
@@ -66,6 +67,7 @@ export default registerAs('env', (): IEnv => {
 
         jwtSecret: process.env.JWT_SECRET as string,
         jwtRefreshSecret: process.env.JWT_REFRESH_SECRET as string,
+        jwtVerifyOtpTokenSectate: process.env.JWT_VERIFY_OTP_SECRATE as string,
 
         cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME as string,
         cloudinaryApiKey: process.env.CLOUDINARY_API_KEY as string,

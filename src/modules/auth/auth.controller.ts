@@ -1,11 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { SignInDto } from './dto/sign.in.dto';
 import { SignUpDto } from './dto/sign.up.dto';
 import { FirebaseLoginDto } from './dto/firebase.login';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
 import { SentOTPDto } from './dto/sent.otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ChangePasswordDto } from './dto/change.password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -64,7 +68,7 @@ export class AuthController {
   }
 
   @Post("sent-otp")
-  @ApiOperation({ summary: "OTP sent to user email" })
+  @ApiOperation({ summary: "OTP sent to user email (Forgot password step - 01)" })
   async sentOtp(@Body() data: SentOTPDto) {
     await this.authService.sentOtpInEmail(data);
 
@@ -75,5 +79,41 @@ export class AuthController {
 
   }
 
+  @Post("verify-otp")
+  @ApiOperation({ summary: "Verify otp (Forgot password step - 02)" })
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    const result = await this.authService.verifyOtp(dto);
+    return {
+      success: true,
+      message: "OTP verified successfully. You may now reset your password.",
+      token: result.token
+    }
+  }
+
+  @Post("reset-password")
+  @ApiOperation({ summary: "reset password (Forgot password step - 03)" })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    const result = await this.authService.resetPassword(dto);
+
+    return {
+      ...result
+    }
+  }
+
+  @Post("change-password")
+  @ApiOperation({ summary: "Change password" })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"))
+  async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    const userId = req.user.userId;
+
+    const result = await this.authService.changePassword(userId, dto);
+
+    return {
+      success: true,
+      ...result
+    }
+
+  }
 
 }

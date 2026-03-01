@@ -60,7 +60,8 @@ model User {
   password     String?
   profile      String?
   refreshToken String?
-  otp          String?
+  otp          Int?
+  otpExpiry    DateTime?
   role         UserRole     @default(USER)
   status       userStatus   @default(ACTIVE)
   provider     AuthProvider @default(CREDENTIAL)

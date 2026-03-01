@@ -9,6 +9,9 @@ import { IEnv } from 'src/config/env.config';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
 import { MailService } from '../mail/mail.service';
 import { SentOTPDto } from './dto/sent.otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change.password.dto';
 // import admin from 'src/config/firebase.admin.config';
 // import { FirebaseLoginDto } from './dto/firebase.login';
 
@@ -38,6 +41,21 @@ export class AuthService {
         );
 
         return { accessToken, refreshToken };
+
+    };
+
+    async verifyOtpToken(user: any) {
+        const token = await this.jwtService.signAsync(
+            {
+                sub: user.userId, email: user.email, role: user.role
+            },
+            {
+                secret: this.configService.get<IEnv>("env")?.jwtVerifyOtpTokenSectate,
+                expiresIn: "5m"
+            }
+        );
+
+        return { token }
 
     }
 
@@ -186,12 +204,137 @@ export class AuthService {
 
         if (!findUser) throw new NotFoundException("Email not found");
 
-        await this.mailService.sendMail(data.email, "sent otp", "5060");
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        const otpExpiry = new Date(Date.now() + 1 * 60 * 1000);
+
+        await this.mailService.sendMail(data.email, "Forgot Password Request", otp);
+
+        await this.prisma.user.update({
+            where: {
+                email: data.email
+            },
+            data: {
+                otp: otp,
+                otpExpiry: otpExpiry
+            }
+        })
 
         return {
             success: true
         }
 
+    };
+
+    async verifyOtp(data: VerifyOtpDto) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { email: data.email }
+            });
+
+            if (!user) {
+                throw new NotFoundException("No account found with this email address.");
+            }
+
+            if (!user.otp) {
+                throw new BadRequestException("No OTP request found. Please request a new OTP.");
+            }
+
+            if (!user.otpExpiry) {
+                throw new BadRequestException("OTP expiration data missing. Please request a new OTP.");
+            }
+
+            if (new Date() > user.otpExpiry) {
+                throw new BadRequestException("Your OTP has expired. Please request a new one.");
+            }
+
+            if (user.otp !== data.otp) {
+                throw new BadRequestException("The OTP you entered is incorrect. Please try again.");
+            }
+
+            await this.prisma.user.update({
+                where: { email: data.email },
+                data: {
+                    otp: null,
+                    otpExpiry: null
+                }
+            });
+
+            const token = await this.verifyOtpToken(user);
+
+            return {
+                token: token.token
+            };
+
+        } catch (error) {
+            if (
+                error instanceof NotFoundException ||
+                error instanceof BadRequestException
+            ) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException(
+                "Something went wrong while verifying OTP. Please try again later."
+            );
+        }
     }
 
+
+    async resetPassword(data: ResetPasswordDto) {
+        try {
+            const payload = await this.jwtService.verifyAsync(data.token, {
+                secret: this.configService.get<IEnv>("env")?.jwtVerifyOtpTokenSectate,
+            });
+
+            const userId = payload.sub;
+
+            const user = await this.prisma.user.findUnique({ where: { userId: userId } });
+            if (!user) throw new NotFoundException("User not found");
+
+            const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+            await this.prisma.user.update({
+                where: { userId: userId },
+                data: {
+                    password: hashedPassword,
+                    otp: null,
+                    otpExpiry: null
+                }
+            });
+
+            return {
+                success: true,
+                message: "Password updated successfully"
+            };
+
+        } catch (err) {
+            throw new BadRequestException("Invalid or expired token. Please verify OTP again.");
+        }
+    }
+
+
+    async changePassword(userId: string, dto: ChangePasswordDto) {
+
+        const user = await this.prisma.user.findUnique({
+            where: { userId }
+        });
+
+
+        if (!user) throw new NotFoundException("User not found");
+
+        if (user.provider !== "CREDENTIAL") throw new BadRequestException("Password change is allowed only for users registered with email and password.")
+
+        const isPasswordMatch = await bcrypt.compare(dto.oldPassword, user.password as string);
+        if (!isPasswordMatch) throw new BadRequestException("Old password is incorrect");
+
+
+        const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+
+        await this.prisma.user.update({
+            where: { userId },
+            data: { password: hashedPassword }
+        });
+
+        return { message: "Password changed successfully" };
+    }
 }

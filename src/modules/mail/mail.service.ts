@@ -22,7 +22,7 @@ export class MailService {
     };
 
 
-    async sendMail(to: string, subject: string, code: string) {
+    async sendMail(to: string, subject: string, code: number) {
         return await this.transport.sendMail({
             from: `"Alisona" <${process.env.SMTP_USER}>`,
             to,
@@ -31,6 +31,7 @@ export class MailService {
             <div style="font-family: Arial">
                 <h2>Your Verification Code</h2>
                 <h1 style="color: #4CAF50">${code}</h1>
+                <p>Your OTP will expire 1 minute latter</p>
             </div>
         `,
         });
