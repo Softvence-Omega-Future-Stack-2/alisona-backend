@@ -35,6 +35,7 @@ enum EventStatus {
   ACTIVE
   INACTIVE
   CANCELLED
+  COMPLITE
 }
 
 enum EventCategory {
@@ -68,8 +69,9 @@ model User {
 
   bookings booking[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  favourites favourite[]
 }
 
 model Event {
@@ -87,6 +89,9 @@ model Event {
   startTime String
   endTime   String?
   duration  String?
+
+  isFamilyFriendly Boolean @default(false)
+  isPoluler        Boolean @default(false)
 
   // Pricing & Capacity
   price          Int
@@ -117,8 +122,9 @@ model Event {
   // Relations
   bookings booking[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  favourites favourite[]
 
   @@index([category])
   @@index([status])
@@ -127,15 +133,27 @@ model Event {
 }
 
 model booking {
-  bookingId String        @id @default(uuid())
-  userId    String
-  eventId   String
-  user      User          @relation(fields: [userId], references: [userId])
-  event     Event         @relation(fields: [eventId], references: [eventId])
-  status    bookingStatus
-  price     Int
-  quentity  Int
+  bookingId   String        @id @default(uuid())
+  userId      String
+  eventId     String
+  fullName    String
+  email       String
+  phoneNumber String
+  user        User          @relation(fields: [userId], references: [userId])
+  event       Event         @relation(fields: [eventId], references: [eventId])
+  status      bookingStatus
+  price       Int
+  quentity    Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model favourite {
+  favouriteId String @id @default(uuid())
+  userId      String
+  eventId     String
+
+  user  User  @relation(fields: [userId], references: [userId])
+  event Event @relation(fields: [eventId], references: [eventId])
 }

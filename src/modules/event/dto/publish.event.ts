@@ -9,7 +9,8 @@ import {
     IsArray,
     ArrayNotEmpty,
     IsLatitude,
-    IsLongitude
+    IsLongitude,
+    IsBoolean
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
@@ -91,6 +92,11 @@ export class CreateEventDto {
     @IsString()
     @IsNotEmpty()
     city: string;
+
+    @ApiProperty({ example: 'Dhaka' })
+    @IsOptional()
+    @IsBoolean()
+    isFamilyFriendly: boolean;
 
     @ApiProperty({ example: 23.8103 })
     @Type(() => Number)

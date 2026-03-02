@@ -162,8 +162,6 @@ export async function bootstrap() {
   logger.log(`App: http://localhost:${port}`);
   logger.log(`API: http://localhost:${port}/api/v1`);
   logger.log(`Docs: http://localhost:${port}/docs`);
-  logger.log(`Health: http://localhost:${port}/api/v1/health`);
-  logger.log(`Metrics: http://localhost:${port}/api/v1/metrics`);
 
   const shutdown = async () => {
     server.close(() => process.exit(0));

@@ -8,6 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './modules/mail/mail.module';
 import { EventModule } from './modules/event/event.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { BookingModule } from './modules/booking/booking.module';
+import { FavouriteModule } from './modules/favourite/favourite.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -15,7 +18,7 @@ import envConfig from './config/env.config';
     isGlobal: true,
     load: [envConfig],
     cache: true
-  }), AuthModule, UserModule, EventModule, CloudinaryModule],
+  }), AuthModule, UserModule, EventModule, CloudinaryModule, BookingModule, FavouriteModule, DashboardModule],
   controllers: [AppController],
   providers: [AppService],
 })
