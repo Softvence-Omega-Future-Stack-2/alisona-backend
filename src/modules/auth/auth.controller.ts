@@ -16,7 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
 
-  @Post("sing-up")
+  @Post("sign-up")
   @ApiOperation({ summary: "User registraction" })
   async signUp(@Body() data: SignUpDto) {
     const result = await this.authService.SignUp(data);
@@ -28,7 +28,7 @@ export class AuthController {
   }
 
 
-  @Post("sing-in")
+  @Post("sign-in")
   @ApiOperation({ summary: "User SignIn" })
   async SignIn(@Body() data: SignInDto) {
     const result = await this.authService.SignIn(data);
