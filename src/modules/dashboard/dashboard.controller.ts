@@ -4,6 +4,7 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
 } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import {
@@ -11,7 +12,11 @@ import {
   ApiOperation,
   ApiQuery,
   ApiResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/Decorator/roles.decorator';
+import { RolesGuard } from 'src/guard/roles.guard';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
@@ -20,7 +25,10 @@ export class DashboardController {
 
 
   @Get('home')
-  @ApiOperation({ summary: 'Get dashboard summary data' })
+  @ApiOperation({ summary: 'Get dashboard summary data (Admin & Super Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
   @ApiResponse({ status: 200, description: 'Dashboard data fetched successfully' })
   async dashboardHome() {
     return this.dashboardService.dashboardHome();
@@ -28,7 +36,10 @@ export class DashboardController {
 
 
   @Get('events')
-  @ApiOperation({ summary: 'Get paginated event list with filters' })
+  @ApiOperation({ summary: 'Get paginated event list with filters (Only Admin & Super Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiQuery({ name: 'search', required: false, example: 'music' })
@@ -53,7 +64,10 @@ export class DashboardController {
 
 
   @Get('users')
-  @ApiOperation({ summary: 'Get paginated user list with filters' })
+  @ApiOperation({ summary: 'Get paginated user list with filters (Admin & Super Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiQuery({ name: 'search', required: false, example: 'jihad' })
@@ -75,7 +89,10 @@ export class DashboardController {
 
 
   @Get('bookings')
-  @ApiOperation({ summary: 'Get paginated booking list' })
+  @ApiOperation({ summary: 'Get paginated booking list (Admin & Super Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, description: 'Booking list fetched successfully' })

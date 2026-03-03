@@ -5,14 +5,20 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiRespons
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EventStatus, eventType } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/Decorator/roles.decorator';
+import { RolesGuard } from 'src/guard/roles.guard';
 
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) { }
 
   @Post('publish-event')
+  @ApiOperation({ summary: "(Only Can Admin)" })
   @UseInterceptors(FileInterceptor('thumbnail'))
   @ApiConsumes('multipart/form-data')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
   @ApiBody({
     schema: {
       type: 'object',
@@ -107,8 +113,8 @@ export class EventController {
 
   @Get('event-calender')
   @ApiOperation({ summary: 'Get event count grouped by month and day' })
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   async getEventDays() {
     const result = await this.eventService.getEventDay();
     return {

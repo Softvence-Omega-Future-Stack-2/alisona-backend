@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -24,6 +24,13 @@ export class AtStrategie extends PassportStrategy(Strategy, "jwt") {
             }
         });
         if (!findUser) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+
+        if (findUser.status === "BAN" || findUser.status === "INACTIVE") {
+            throw new UnauthorizedException(
+                `Your account has been ${findUser.status.toLowerCase()}. Please contact support for assistance.`
+            );
+        }
+
         const { password, refreshToken, otp, otpExpiry, ...user } = findUser;
         return user;
     }

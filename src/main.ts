@@ -96,8 +96,19 @@ function setupRateLimiting(app: any, configService: ConfigService, nodeEnv: stri
 }
 
 function setupSecurity(app: any, configService: ConfigService, nodeEnv: string): void {
-  app.use(helmet({ contentSecurityPolicy: nodeEnv === 'production' ? undefined : false }));
-  app.enableCors({ origin: '*' });
+  app.use(
+    helmet({
+      contentSecurityPolicy: nodeEnv === 'production' ? undefined : false,
+    }),
+  );
+
+  app.enableCors({
+    origin: [
+      'https://alisona555-dashboard.vercel.app',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+  });
 }
 
 function setupRequestLogging(app: any, logger: Logger): void {
@@ -134,7 +145,9 @@ export async function bootstrap() {
 
   initializeAPM(configService, nodeEnv);
 
-  const port = await getAvailablePort(configService.get<number>('PORT', 3000));
+  // const port = await getAvailablePort(configService.get<number>('PORT', 3000));
+  const port = Number(process.env.PORT) || 3000;
+  // await app.listen(port, '0.0.0.0');
 
   app.setGlobalPrefix('api');
 
@@ -158,6 +171,10 @@ export async function bootstrap() {
   setupSwagger(app, nodeEnv, port);
 
   const server = await app.listen(port, '0.0.0.0');
+
+  app.getHttpAdapter().get('/', (req, res) => {
+    res.status(200).send('Event Management API Running 🚀');
+  });
 
   logger.log(`App: http://localhost:${port}`);
   logger.log(`API: http://localhost:${port}/api/v1`);
