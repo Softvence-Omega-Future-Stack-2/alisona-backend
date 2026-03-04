@@ -93,8 +93,9 @@ export class CreateEventDto {
     @IsNotEmpty()
     city: string;
 
-    @ApiProperty({ example: 'Dhaka' })
+    @ApiProperty({ example: true })
     @IsOptional()
+    @Transform(({ value }) => value === 'true' || value === true)
     @IsBoolean()
     isFamilyFriendly: boolean;
 
