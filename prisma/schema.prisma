@@ -60,6 +60,7 @@ model User {
   email        String       @unique
   password     String?
   profile      String?
+  phone        String?
   refreshToken String?
   otp          Int?
   otpExpiry    DateTime?

@@ -1,10 +1,17 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MakeBookingDto } from './dto/make.booking.dto';
+import { StripeService } from 'src/stripe/stripe.service';
+import Stripe from 'stripe';
 
 @Injectable()
 export class BookingService {
-    constructor(private readonly prisma: PrismaService) { };
+    private stripeType: Stripe;
+    constructor(private readonly prisma: PrismaService, private readonly stripe: StripeService) {
+        this.stripeType = new Stripe(process.env.STRIPE_SECRATE_KEY as string, {
+            apiVersion: "2026-02-25.clover"
+        })
+    };
 
     async makeBooking(userId: string, dto: MakeBookingDto) {
         const event = await this.prisma.event.findUnique({
@@ -58,10 +65,16 @@ export class BookingService {
             },
         });
 
+        // const paymentIntent = await this.stripe.createPayment(dto.price);
+        const checkout = await this.stripe.createCheckoutSession(dto.price);
+
+
         return {
             booking,
             event,
-            user
+            user,
+            // clientSrcrate: paymentIntent.client_secret
+            url: checkout.url
         }
 
     }
@@ -79,6 +92,32 @@ export class BookingService {
 
         return booking;
 
+    }
+
+    async handleWebhookEvent(event: Stripe.Event) {
+
+        try {
+            switch (event.type) {
+                case 'payment_intent.succeeded':
+                    console.log("Successssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+                    break;
+
+                case 'payment_intent.payment_failed':
+                    console.log("Payment Faild..................................................");
+                    break;
+
+                case 'payment_intent.canceled':
+                    console.log("Payment Cahcled.....................................................................");
+                    break;
+
+                default:
+                    console.log(`ℹ️ Unhandled event type: ${event.type}`);
+            }
+
+        } catch (error) {
+
+            throw error;
+        }
     }
 
 }

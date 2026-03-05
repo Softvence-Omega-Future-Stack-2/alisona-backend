@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import helmet from 'helmet';
 // import * as compression from 'compression';
 // import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 import * as net from 'net';
 import { HttpExceptionFilter } from './common/filters';
 import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
@@ -23,27 +24,27 @@ try {
   RedisStore = require('rate-limit-redis');
 } catch { }
 
-async function getAvailablePort(startPort: number, maxAttempts = 10): Promise<number> {
-  return new Promise((resolve, reject) => {
-    let attempts = 0;
-    const tryPort = (port: number) => {
-      const server = net.createServer();
-      server.once('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE') {
-          attempts++;
-          if (attempts >= maxAttempts) reject(err);
-          else tryPort(port + 1);
-        } else reject(err);
-      });
-      server.once('listening', () => {
-        server.close();
-        resolve(port);
-      });
-      server.listen(port);
-    };
-    tryPort(startPort);
-  });
-}
+// async function getAvailablePort(startPort: number, maxAttempts = 10): Promise<number> {
+//   return new Promise((resolve, reject) => {
+//     let attempts = 0;
+//     const tryPort = (port: number) => {
+//       const server = net.createServer();
+//       server.once('error', (err: NodeJS.ErrnoException) => {
+//         if (err.code === 'EADDRINUSE') {
+//           attempts++;
+//           if (attempts >= maxAttempts) reject(err);
+//           else tryPort(port + 1);
+//         } else reject(err);
+//       });
+//       server.once('listening', () => {
+//         server.close();
+//         resolve(port);
+//       });
+//       server.listen(port);
+//     };
+//     tryPort(startPort);
+//   });
+// }
 
 function initializeAPM(configService: ConfigService, nodeEnv: string): void {
   if (nodeEnv === 'production' && apm) {
@@ -170,7 +171,11 @@ export async function bootstrap() {
   setupRequestLogging(app, logger);
   setupSwagger(app, nodeEnv, port);
 
+
+  app.use('/booking/webhook', bodyParser.raw({ type: 'application/json' }));
+
   const server = await app.listen(port, '0.0.0.0');
+
 
   app.getHttpAdapter().get('/', (req, res) => {
     res.status(200).send('Event Management API Running 🚀');
