@@ -1,12 +1,13 @@
-import { Body, Controller, DefaultValuePipe, Get, ParseIntPipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/publish.event';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EventStatus, eventType } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/Decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('event')
 export class EventController {
@@ -122,6 +123,63 @@ export class EventController {
       message: 'Fetched events grouped by month and day successfully',
       data: result,
     };
+  }
+
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update Event (Only Can Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    example: 1,
+  })
+
+  @ApiBody({
+    type: UpdateEventDto,
+  })
+
+  @ApiResponse({
+    status: 200,
+    description: 'Event updated successfully',
+  })
+
+  @ApiResponse({
+    status: 404,
+    description: 'Event not found',
+  })
+  async updateEvent(
+    @Param('id', ParseIntPipe) id: string,
+    @Body() updateEventDto: UpdateEventDto,
+  ) {
+    return this.eventService.updateEvent(id, updateEventDto);
+  }
+
+  @Delete(':eventId')
+  @ApiOperation({ summary: 'Delete Event by eventId (Only Can Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
+  @ApiParam({
+    name: 'eventId',
+    example: 'evt_12345',
+    description: 'Unique Event ID',
+  })
+
+  @ApiResponse({
+    status: 200,
+    description: 'Event deleted successfully',
+  })
+
+  @ApiResponse({
+    status: 404,
+    description: 'Event not found',
+  })
+
+  async deleteEvent(@Param('eventId') eventId: string) {
+    return this.eventService.deleteEvent(eventId);
   }
 
 }

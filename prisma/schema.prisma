@@ -38,6 +38,12 @@ enum EventStatus {
   COMPLITE
 }
 
+enum BookingSlotStatus {
+  NOT_CONFIRM
+  CONFIRM
+  REFUND
+}
+
 enum EventCategory {
   MUSIC
   SPORTS
@@ -134,17 +140,18 @@ model Event {
 }
 
 model booking {
-  bookingId   String        @id @default(uuid())
-  userId      String
-  eventId     String
-  fullName    String
-  email       String
-  phoneNumber String
-  user        User          @relation(fields: [userId], references: [userId])
-  event       Event         @relation(fields: [eventId], references: [eventId])
-  status      bookingStatus
-  price       Int
-  quentity    Int
+  bookingId            String            @id @default(uuid())
+  userId               String
+  eventId              String
+  fullName             String
+  email                String
+  phoneNumber          String
+  user                 User              @relation(fields: [userId], references: [userId])
+  event                Event             @relation(fields: [eventId], references: [eventId])
+  status               bookingStatus
+  bookingConfarmStatus BookingSlotStatus @default(NOT_CONFIRM)
+  price                Int
+  quentity             Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

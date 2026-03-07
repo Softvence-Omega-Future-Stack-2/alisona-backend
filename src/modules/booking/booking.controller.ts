@@ -1,9 +1,12 @@
-import { Body, Controller, Headers, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Headers, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { MakeBookingDto } from './dto/make.booking.dto';
 import Stripe from 'stripe';
+import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { RolesGuard } from 'src/guard/roles.guard';
+import { Roles } from 'src/Decorator/roles.decorator';
 
 @Controller('booking')
 export class BookingController {
@@ -48,6 +51,38 @@ export class BookingController {
     await this.bookingService.handleWebhookEvent(event);
 
     return { received: true };
+  };
+
+
+  @Patch(':bookingId/status')
+  @ApiOperation({ summary: 'Update booking confirmation status (Only Can Admin)' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
+  @ApiParam({
+    name: 'bookingId',
+    example: 'bk_123456'
+  })
+  @ApiBody({
+    type: UpdateBookingStatusDto
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Booking status updated successfully'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Booking not found'
+  })
+  async bookingStatusUpdate(
+    @Param('bookingId') bookingId: string,
+    @Body() body: UpdateBookingStatusDto
+  ) {
+    return this.bookingService.bookingStatusUpdate(
+      bookingId,
+      body.status
+    );
   }
+
 
 }

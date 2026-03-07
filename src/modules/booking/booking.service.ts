@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { MakeBookingDto } from './dto/make.booking.dto';
 import { StripeService } from 'src/stripe/stripe.service';
 import Stripe from 'stripe';
+import { BookingSlotStatus } from '@prisma/client';
+import { PrivateResultType } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class BookingService {
@@ -118,6 +120,28 @@ export class BookingService {
 
             throw error;
         }
+    }
+
+    async bookingStatusUpdate(bookingId: string, status: BookingSlotStatus) {
+        const booking = await this.prisma.booking.findUnique({
+            where: {
+                bookingId: bookingId
+            }
+        });
+
+        if (!booking) throw new NotFoundException("Booking not found");
+
+        const result = await this.prisma.booking.update({
+            where: {
+                bookingId: bookingId
+            },
+            data: {
+                bookingConfarmStatus: status
+            }
+        });
+
+        return result;
+
     }
 
 }

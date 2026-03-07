@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CreateEventDto } from './dto/publish.event';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventService {
-    constructor(private readonly cloudinaryService: CloudinaryService, private readonly prisma: PrismaService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService, private readonly prisma: PrismaService){}
 
     async PublishEvent(thumbnail: Express.Multer.File, data: CreateEventDto) {
         const image: any = await this.cloudinaryService.uploadImageFromBuffer(thumbnail.buffer, "thumbnail", `thumbnail-${Date.now()}-${Math.random()}`);
@@ -17,7 +18,7 @@ export class EventService {
             }
         });
         return event;
-    }
+    };
 
     async getAllEvent(page: number, limit: number, search?: string, category?: string, city?: string, minPrice?: number, maxPrice?: number, freeOnly?: boolean, familyFriendly?: boolean, upcoming?: boolean) {
         const skip = (page - 1) * limit;
@@ -86,6 +87,17 @@ export class EventService {
             orderBy: {
                 eventDate: "asc",
             },
+            include: {
+                _count: {
+                    select: {
+                        bookings: {
+                            where: {
+                                status: "PAID"
+                            }
+                        }
+                    }
+                }
+            }
         })
 
         const total = await this.prisma.event.count({ where });
@@ -104,7 +116,7 @@ export class EventService {
             eventData: { totalActiveEvent, totalIncativeEvent, totalFreeEvent, totalPaidEvent },
             data: events,
         };
-    }
+    };
 
     async getSingleEvent(eventId: string) {
         const event = await this.prisma.event.findUnique({
@@ -116,7 +128,7 @@ export class EventService {
         if (!event) throw new NotFoundException("Event not found");
 
         return event
-    }
+    };
 
     async getEventDay() {
         const events = await this.prisma.event.findMany({
@@ -159,6 +171,44 @@ export class EventService {
             totalPaidEvent,
             data: result
         };
-    }
+    };
+
+    async deleteEvent(eventId: string) {
+        const event = await this.prisma.event.findUnique({
+            where: {
+                eventId: eventId
+            }
+        });
+
+        if (!event) throw new NotFoundException("Event Not foud");
+
+        const result = await this.prisma.event.delete({
+            where: {
+                eventId: eventId
+            }
+        });
+        return result;
+    };
+
+    async updateEvent(id: string, updateEventDto: UpdateEventDto) {
+
+        const event = await this.prisma.event.findUnique({
+            where: { eventId: id },
+        });
+
+        if (!event) {
+            throw new NotFoundException('Event not found');
+        }
+
+        const updatedEvent = await this.prisma.event.update({
+            where: { eventId: id },
+            data: updateEventDto,
+        });
+
+        return {
+            message: 'Event updated successfully',
+            data: updatedEvent,
+        };
+    };
 
 }
