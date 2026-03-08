@@ -1,6 +1,6 @@
 import { Body, Controller, Headers, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { MakeBookingDto } from './dto/make.booking.dto';
 import Stripe from 'stripe';
@@ -33,6 +33,7 @@ export class BookingController {
 
 
   @Post('webhook')
+  @ApiExcludeEndpoint()
   async webhook(
     @Req() req: any,
     @Headers('stripe-signature') signature: string,

@@ -114,8 +114,6 @@ export class BookingService {
                             status: "PAID"
                         }
                     })
-                    console.log("Success BookingId :", bookingId)
-                    console.log("Successssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                     break;
 
                 case 'payment_intent.payment_failed':
@@ -127,7 +125,6 @@ export class BookingService {
                             status: "FAILED"
                         }
                     })
-                    console.log("Payment Faild..................................................");
                     break;
 
                 case 'payment_intent.canceled':
@@ -139,7 +136,6 @@ export class BookingService {
                             status: "CANCEL"
                         }
                     })
-                    console.log("Payment Cahcled.....................................................................");
                     break;
 
                 default:
