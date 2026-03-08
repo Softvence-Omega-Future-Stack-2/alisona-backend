@@ -4,7 +4,6 @@ import { MakeBookingDto } from './dto/make.booking.dto';
 import { StripeService } from 'src/stripe/stripe.service';
 import Stripe from 'stripe';
 import { BookingSlotStatus } from '@prisma/client';
-import { PrivateResultType } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class BookingService {
@@ -67,8 +66,8 @@ export class BookingService {
             },
         });
 
-        // const paymentIntent = await this.stripe.createPayment(dto.price);
-        const checkout = await this.stripe.createCheckoutSession(dto.price);
+        // const paymentIntent = await this.stripe.createPayment(dto.price, booking.bookingId);
+        const checkout = await this.stripe.createCheckoutSession(dto.price, booking.bookingId);
 
 
         return {
@@ -101,6 +100,10 @@ export class BookingService {
         try {
             switch (event.type) {
                 case 'payment_intent.succeeded':
+                    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+                    const metadata = paymentIntent.metadata;
+                    const bookingId = paymentIntent.metadata.bookingId;
+
                     console.log("Successssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                     break;
 

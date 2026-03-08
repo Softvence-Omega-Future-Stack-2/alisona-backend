@@ -13,18 +13,21 @@ export class StripeService {
         })
     };
 
-    async createPayment(amount: number){
+    async createPayment(amount: number, bookingId: string) {
         const paymentIntent = await this.stripe.paymentIntents.create({
             amount: amount * 100,
             currency: "usd",
-            payment_method_types: ["card"]
+            payment_method_types: ["card"],
+            metadata: {
+                bookingId: bookingId
+            }
         });
 
         return paymentIntent;
 
     }
 
-    async createCheckoutSession(price: number) {
+    async createCheckoutSession(price: number, bookingId: string) {
 
         const session = await this.stripe.checkout.sessions.create({
             mode: "payment",
@@ -38,9 +41,15 @@ export class StripeService {
                         },
                         unit_amount: price * 100,
                     },
-                    quantity: 1,
+                    quantity: 1
                 },
             ],
+            payment_intent_data: {
+                metadata: {
+                    bookingId: bookingId
+                }
+            },
+
             success_url: `${process.env.FRONTEND_SUCCESS_URL}`,
             cancel_url: `${process.env.FRONTEND_CANCEL_URL}`
         });
