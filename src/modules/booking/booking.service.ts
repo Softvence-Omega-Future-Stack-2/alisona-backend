@@ -97,21 +97,48 @@ export class BookingService {
 
     async handleWebhookEvent(event: Stripe.Event) {
 
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const bookingId = paymentIntent.metadata.bookingId;
+
+
         try {
             switch (event.type) {
-                case 'payment_intent.succeeded':
-                    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                    const metadata = paymentIntent.metadata;
-                    const bookingId = paymentIntent.metadata.bookingId;
 
+                case 'payment_intent.succeeded':
+
+                    await this.prisma.booking.update({
+                        where: {
+                            bookingId: bookingId
+                        },
+                        data: {
+                            status: "PAID"
+                        }
+                    })
+                    console.log("Success BookingId :", bookingId)
                     console.log("Successssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                     break;
 
                 case 'payment_intent.payment_failed':
+                    await this.prisma.booking.update({
+                        where: {
+                            bookingId: bookingId
+                        },
+                        data: {
+                            status: "FAILED"
+                        }
+                    })
                     console.log("Payment Faild..................................................");
                     break;
 
                 case 'payment_intent.canceled':
+                    await this.prisma.booking.update({
+                        where: {
+                            bookingId: bookingId
+                        },
+                        data: {
+                            status: "CANCEL"
+                        }
+                    })
                     console.log("Payment Cahcled.....................................................................");
                     break;
 
