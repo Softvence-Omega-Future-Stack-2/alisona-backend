@@ -172,7 +172,7 @@ export async function bootstrap() {
   setupSwagger(app, nodeEnv, port);
 
 
-  app.use('/booking/webhook', bodyParser.raw({ type: 'application/json' }));
+  app.use('/api/v1/booking/webhook', bodyParser.raw({ type: 'application/json' }));
 
   const server = await app.listen(port, '0.0.0.0');
 
