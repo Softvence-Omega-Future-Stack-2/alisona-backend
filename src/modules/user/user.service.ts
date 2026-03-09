@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/user.profile.update.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -16,6 +16,19 @@ export class UserService {
 
         if (!user) {
             throw new NotFoundException("User not found");
+        }
+
+        if (data.email) {
+            if (user.email !== data.email) {
+                const checkEmail = await this.prisma.user.findUnique({
+                    where: {
+                        email: data.email
+                    }
+                });
+
+                if (checkEmail) throw new BadRequestException(`${data.email} already exist.`)
+
+            }
         }
 
         let profileImageUrl = user.profile;
@@ -39,9 +52,11 @@ export class UserService {
             },
         });
 
+        const { password, refreshToken, otp, otpExpiry, ...rest } = updatedUser;
+
         return {
             message: "Profile updated successfully",
-            data: updatedUser,
+            data: rest,
         };
     }
 
