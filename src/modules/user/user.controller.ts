@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -66,4 +66,25 @@ export class UserController {
   ) {
     return this.userService.updateUserStatus(userId, body.status);
   }
+
+
+  @Get("getMe")
+  @ApiOperation({summary : "Get me"})
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"))
+  @ApiOperation({ summary: "Get me" })
+  async getMe(@Req() req: any) {
+    const userId = req.user.userId;
+    return await this.userService.getMe(userId);
+  }
+
+  @Get('get-single-user/:userId')
+  @ApiOperation({summary : "Get Single user (Only Can Admin)"})
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
+  async getSingleUser(@Param('userId') userId: string) {
+    return await this.userService.getMe(userId);
+  }
+
 }
