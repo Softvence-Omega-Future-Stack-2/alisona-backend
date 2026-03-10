@@ -84,6 +84,7 @@ export class EventController {
   @ApiQuery({ name: 'freeOnly', required: false, example: true, type: Boolean })
   @ApiQuery({ name: 'familyFriendly', required: false, example: true, type: Boolean })
   @ApiQuery({ name: 'upcoming', required: false, example: true, type: Boolean })
+  @ApiQuery({ name: 'status', enum: EventStatus, required: false, example: EventStatus.ACTIVE, type: String })
 
   async getAllEvents(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
@@ -96,6 +97,7 @@ export class EventController {
     @Query('freeOnly') freeOnly?: string,
     @Query('familyFriendly') familyFriendly?: string,
     @Query('upcoming') upcoming?: string,
+    @Query('status') status?: EventStatus,
   ) {
     return this.eventService.getAllEvent(
       page ?? 1,
@@ -108,6 +110,7 @@ export class EventController {
       freeOnly === 'true',
       familyFriendly === 'true',
       upcoming === 'true',
+      status
     );
   }
 

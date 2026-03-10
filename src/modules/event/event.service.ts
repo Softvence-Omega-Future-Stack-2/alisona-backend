@@ -3,6 +3,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CreateEventDto } from './dto/publish.event';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { EventStatus } from '@prisma/client';
 
 @Injectable()
 export class EventService {
@@ -20,7 +21,7 @@ export class EventService {
         return event;
     };
 
-    async getAllEvent(page: number, limit: number, search?: string, category?: string, city?: string, minPrice?: number, maxPrice?: number, freeOnly?: boolean, familyFriendly?: boolean, upcoming?: boolean) {
+    async getAllEvent(page: number, limit: number, search?: string, category?: string, city?: string, minPrice?: number, maxPrice?: number, freeOnly?: boolean, familyFriendly?: boolean, upcoming?: boolean, status?: EventStatus) {
         const skip = (page - 1) * limit;
         const now = new Date();
 
@@ -78,6 +79,10 @@ export class EventService {
             where.eventDate = {
                 gte: now,
             };
+        }
+
+        if (status) {
+            where.status = status
         }
 
         const events = await this.prisma.event.findMany({
