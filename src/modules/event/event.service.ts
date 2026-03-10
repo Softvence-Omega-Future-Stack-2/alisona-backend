@@ -25,9 +25,7 @@ export class EventService {
         const skip = (page - 1) * limit;
         const now = new Date();
 
-        const where: any = {
-            status: "ACTIVE",
-        };
+        const where: any = {};
 
         if (search) {
             where.OR = [
