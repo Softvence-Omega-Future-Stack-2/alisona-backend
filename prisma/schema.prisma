@@ -146,8 +146,8 @@ model booking {
   fullName             String
   email                String
   phoneNumber          String
-  user                 User              @relation(fields: [userId], references: [userId])
-  event                Event             @relation(fields: [eventId], references: [eventId])
+  user                 User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  event                Event             @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
   status               bookingStatus
   bookingConfarmStatus BookingSlotStatus @default(NOT_CONFIRM)
   price                Int
@@ -162,6 +162,6 @@ model favourite {
   userId      String
   eventId     String
 
-  user  User  @relation(fields: [userId], references: [userId])
-  event Event @relation(fields: [eventId], references: [eventId])
+  user  User  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
 }
