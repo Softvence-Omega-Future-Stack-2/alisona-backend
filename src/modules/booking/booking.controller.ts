@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { ApiBearerAuth, ApiBody, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -85,5 +85,32 @@ export class BookingController {
     );
   }
 
+
+
+  @Get('payment/success')
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: 'Stripe Payment Success' })
+  @ApiResponse({ status: 200, description: 'Payment completed successfully' })
+  async paymentSuccess(
+  ) {
+
+    return {
+      success: true,
+      message: "Payment completed successfully"
+    };
+  }
+
+
+  @Get('payment/cancel')
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: 'Stripe Payment Cancelled' })
+  @ApiResponse({ status: 200, description: 'Payment cancelled' })
+  async paymentCancel() {
+
+    return {
+      success: false,
+      message: "Payment was cancelled"
+    };
+  }
 
 }
