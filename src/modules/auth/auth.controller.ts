@@ -44,12 +44,12 @@ export class AuthController {
   @Post("firebase-login")
   @ApiOperation({ summary: "Google and Apple login only" })
   async firebaseLogin(@Body() dto: FirebaseLoginDto) {
-    // const result = await this.firebaseLogin(dto);
+    const result = await this.firebaseLogin(dto);
 
     return {
       success: true,
       message: "Not Implement",
-      // data: result
+      data: result
     }
 
   }

@@ -97,7 +97,6 @@ export class UserService {
 
     }
 
-
     async getMe(userId: string) {
         const user = await this.prisma.user.findUnique({
             where: {

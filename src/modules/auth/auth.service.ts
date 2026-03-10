@@ -12,8 +12,8 @@ import { SentOTPDto } from './dto/sent.otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change.password.dto';
-// import admin from 'src/config/firebase.admin.config';
-// import { FirebaseLoginDto } from './dto/firebase.login';
+import admin from 'src/config/firebase.admin.config';
+import { FirebaseLoginDto } from './dto/firebase.login';
 
 @Injectable()
 export class AuthService {
@@ -112,52 +112,52 @@ export class AuthService {
 
     }
 
-    // async firebaseLogin(dto: FirebaseLoginDto) {
-    //     const decoded = await admin.auth().verifyIdToken(dto.idToken);
+    async firebaseLogin(dto: FirebaseLoginDto) {
+        const decoded = await admin.auth().verifyIdToken(dto.idToken);
 
-    //     let user = await this.prisma.user.findUnique({
-    //         where: {
-    //             userId: decoded.uid
-    //         }
-    //     });
+        let user = await this.prisma.user.findUnique({
+            where: {
+                userId: decoded.uid
+            }
+        });
 
-    //     const record = await admin.auth().getUser(decoded.uid);
+        const record = await admin.auth().getUser(decoded.uid);
 
-    //     const email = decoded.email ?? record.email ?? '';
+        const email = decoded.email ?? record.email ?? '';
 
-    //     if (!email) throw new NotFoundException("email not found");
+        if (!email) throw new NotFoundException("email not found");
 
-    //     const firebaseProvider = decoded.firebase.sign_in_provider;
-    //     const providerMap = {
-    //         'apple.com': 'APPLE',
-    //         'google.com': 'GOOGLE'
-    //     };
-    //     const provider = providerMap[firebaseProvider] || 'CREDENTIAL';
+        const firebaseProvider = decoded.firebase.sign_in_provider;
+        const providerMap = {
+            'apple.com': 'APPLE',
+            'google.com': 'GOOGLE'
+        };
+        const provider = providerMap[firebaseProvider] || 'CREDENTIAL';
 
-    //     if (!user) {
-    //         user = await this.prisma.user.create({
-    //             data: {
-    //                 userId: decoded.uid,
-    //                 email: email,
-    //                 username: record.displayName,
-    //                 profile: record.photoURL,
-    //                 provider: provider
-    //             }
-    //         })
-    //     }
+        if (!user) {
+            user = await this.prisma.user.create({
+                data: {
+                    userId: decoded.uid,
+                    email: email,
+                    username: record.displayName,
+                    profile: record.photoURL,
+                    provider: provider
+                }
+            })
+        }
 
-    //     const tokens = await this.generateToken(user);
+        const tokens = await this.generateToken(user);
 
-    //    await this.prisma.user.update({ where: { userId: user.userId }, data: { refreshToken: tokens.refreshToken } })
+       await this.prisma.user.update({ where: { userId: user.userId }, data: { refreshToken: tokens.refreshToken } })
 
-    //     const { password, refreshToken, otp, ...info } = user;
+        const { password, refreshToken, otp, ...info } = user;
 
-    //     return {
-    //         tokens,
-    //         user: info
-    //     }
+        return {
+            tokens,
+            user: info
+        }
 
-    // }
+    }
 
     async generateAccessTokenUseRefreshToken(data: RefreshTokenDto) {
         try {
