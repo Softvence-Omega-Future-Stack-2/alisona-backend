@@ -136,7 +136,7 @@ export class EventController {
   @Roles("ADMIN", "SUPER_ADMIN")
   @ApiParam({
     name: 'id',
-    type: Number,
+    type: String,
     example: 1,
   })
 
