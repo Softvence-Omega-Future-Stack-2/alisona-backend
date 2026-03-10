@@ -185,4 +185,27 @@ export class EventController {
     return this.eventService.deleteEvent(eventId);
   }
 
+  @Get(':eventId')
+  @ApiOperation({ summary: 'Get Single Event' })
+  @ApiParam({
+    name: 'eventId',
+    type: 'string',
+    description: 'Event ID'
+  })
+  @ApiResponse({ status: 200, description: 'Event fetched successfully' })
+  @ApiResponse({ status: 404, description: 'Event not found' })
+  async getSingleEvent(
+    @Param('eventId') eventId: string
+  ) {
+
+    const result = await this.eventService.getSingleEvent(eventId);
+
+    return {
+      success: true,
+      message: "Event fetched successfully",
+      data: result
+    };
+
+  }
+
 }

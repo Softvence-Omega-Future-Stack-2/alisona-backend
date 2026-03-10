@@ -112,6 +112,34 @@ export class AuthService {
 
     }
 
+    async logout(userId: string) {
+
+        const user = await this.prisma.user.findUnique({
+            where: { userId }
+        });
+
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (!user.refreshToken) {
+            return {
+                message: "User already logged out"
+            };
+        }
+
+        await this.prisma.user.update({
+            where: { userId },
+            data: {
+                refreshToken: null
+            }
+        });
+
+        return {
+            message: "Logout successful"
+        };
+    }
+
     async firebaseLogin(dto: FirebaseLoginDto) {
         const decoded = await admin.auth().verifyIdToken(dto.idToken);
 
@@ -148,7 +176,7 @@ export class AuthService {
 
         const tokens = await this.generateToken(user);
 
-       await this.prisma.user.update({ where: { userId: user.userId }, data: { refreshToken: tokens.refreshToken } })
+        await this.prisma.user.update({ where: { userId: user.userId }, data: { refreshToken: tokens.refreshToken } })
 
         const { password, refreshToken, otp, ...info } = user;
 

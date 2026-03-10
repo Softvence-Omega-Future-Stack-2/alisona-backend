@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SignInDto } from './dto/sign.in.dto';
 import { SignUpDto } from './dto/sign.up.dto';
 import { FirebaseLoginDto } from './dto/firebase.login';
@@ -65,6 +65,25 @@ export class AuthController {
       data: result
     }
 
+  };
+
+  @Post('logout')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"))
+  @ApiOperation({ summary: 'User Logout' })
+  @ApiResponse({ status: 200, description: 'User logged out successfully' })
+  async logout(
+    @Req() req: any
+  ) {
+
+    const userId = req.user.userId;
+
+    const result = await this.authService.logout(userId);
+
+    return {
+      success: true,
+      message: result.message
+    };
   }
 
   @Post("sent-otp")
