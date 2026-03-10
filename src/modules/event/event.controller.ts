@@ -154,7 +154,7 @@ export class EventController {
     description: 'Event not found',
   })
   async updateEvent(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Body() updateEventDto: UpdateEventDto,
   ) {
     return this.eventService.updateEvent(id, updateEventDto);
