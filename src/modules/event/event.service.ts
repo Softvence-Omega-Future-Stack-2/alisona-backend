@@ -6,7 +6,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventService {
-    constructor(private readonly cloudinaryService: CloudinaryService, private readonly prisma: PrismaService){}
+    constructor(private readonly cloudinaryService: CloudinaryService, private readonly prisma: PrismaService) { }
 
     async PublishEvent(thumbnail: Express.Multer.File, data: CreateEventDto) {
         const image: any = await this.cloudinaryService.uploadImageFromBuffer(thumbnail.buffer, "thumbnail", `thumbnail-${Date.now()}-${Math.random()}`);
@@ -131,9 +131,7 @@ export class EventService {
     };
 
     async getEventDay() {
-        const events = await this.prisma.event.findMany({
-            select: { eventDate: true },
-        });
+        const events = await this.prisma.event.findMany(); // all event data
 
         const totalActiveEvent = await this.prisma.event.count({ where: { status: "ACTIVE" } });
         const totalIncativeEvent = await this.prisma.event.count({ where: { status: "INACTIVE" } });
@@ -145,7 +143,7 @@ export class EventService {
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
 
-        const result = {};
+        const result: any = {};
 
         events.forEach((e) => {
             const date = new Date(e.eventDate);
@@ -160,8 +158,17 @@ export class EventService {
             if (!result[monthKey]) result[monthKey] = { total: 0, days: {} };
             result[monthKey].total += 1;
 
-            if (!result[monthKey].days[dayKey]) result[monthKey].days[dayKey] = 0;
-            result[monthKey].days[dayKey] += 1;
+            if (!result[monthKey].days[dayKey]) {
+                result[monthKey].days[dayKey] = {
+                    total: 0,
+                    events: []
+                };
+            }
+
+            result[monthKey].days[dayKey].total += 1;
+
+            // push full event object
+            result[monthKey].days[dayKey].events.push(e);
         });
 
         return {
@@ -171,8 +178,7 @@ export class EventService {
             totalPaidEvent,
             data: result
         };
-    };
-
+    }
     async deleteEvent(eventId: string) {
         const event = await this.prisma.event.findUnique({
             where: {
