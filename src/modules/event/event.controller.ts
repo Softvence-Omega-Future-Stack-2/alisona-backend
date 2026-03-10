@@ -205,7 +205,41 @@ export class EventController {
       message: "Event fetched successfully",
       data: result
     };
+  };
 
+
+  @Patch(':eventId/thumbnail')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Roles("ADMIN", "SUPER_ADMIN")
+  @ApiOperation({ summary: 'Update Event Thumbnail' })
+  @ApiParam({ name: 'eventId', type: 'string', description: 'Event ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        thumbnail: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('thumbnail'))
+  @ApiResponse({ status: 200, description: 'Thumbnail updated successfully' })
+  async eventThumbnailUpdate(
+    @Param('eventId') eventId: string,
+    @UploadedFile() thumbnail: Express.Multer.File
+  ) {
+
+    const result = await this.eventService.eventThumbnailUpdate(eventId, thumbnail);
+
+    return {
+      success: true,
+      message: "Event thumbnail updated successfully",
+      data: result
+    };
   }
 
 }

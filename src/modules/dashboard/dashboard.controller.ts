@@ -17,6 +17,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/Decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
+import { BookingSlotStatus } from '@prisma/client';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
@@ -89,17 +90,21 @@ export class DashboardController {
 
 
   @Get('bookings')
-  @ApiOperation({ summary: 'Get paginated booking list (Admin & Super Admin)' })
+  @ApiOperation({ summary: 'Get paginated booking list (Admin & Super Admin) with search & filter' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard("jwt"), RolesGuard)
   @Roles("ADMIN", "SUPER_ADMIN")
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({ name: 'search', required: false, example: '' })
+  @ApiQuery({ name: 'status', required: false, enum: BookingSlotStatus, description: 'Booking status filter' })
   @ApiResponse({ status: 200, description: 'Booking list fetched successfully' })
   async bookingManagement(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('status') status?: BookingSlotStatus,
   ) {
-    return this.dashboardService.bookingManagement(page, limit);
+    return this.dashboardService.bookingManagement(page, limit, search, status);
   }
 }

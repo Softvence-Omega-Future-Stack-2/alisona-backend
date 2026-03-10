@@ -57,12 +57,12 @@ export class AuthService {
 
         return { token }
 
-    }
+    };
 
     async hashPassword(password: string) {
         const hast = await bcrypt.hash(password, 10);
         return hast;
-    }
+    };
 
     async SignUp(data: SignUpDto) {
         const user = await this.prisma.user.findUnique({
@@ -110,7 +110,7 @@ export class AuthService {
             user: info
         }
 
-    }
+    };
 
     async logout(userId: string) {
 
@@ -138,7 +138,7 @@ export class AuthService {
         return {
             message: "Logout successful"
         };
-    }
+    };
 
     async firebaseLogin(dto: FirebaseLoginDto) {
         const decoded = await admin.auth().verifyIdToken(dto.idToken);
@@ -185,7 +185,7 @@ export class AuthService {
             user: info
         }
 
-    }
+    };
 
     async generateAccessTokenUseRefreshToken(data: RefreshTokenDto) {
         try {
@@ -221,7 +221,7 @@ export class AuthService {
         }
 
 
-    }
+    };
 
     async sentOtpInEmail(data: SentOTPDto) {
         const findUser = await this.prisma.user.findUnique({
@@ -305,8 +305,7 @@ export class AuthService {
                 "Something went wrong while verifying OTP. Please try again later."
             );
         }
-    }
-
+    };
 
     async resetPassword(data: ResetPasswordDto) {
         try {
@@ -338,8 +337,7 @@ export class AuthService {
         } catch (err) {
             throw new BadRequestException("Invalid or expired token. Please verify OTP again.");
         }
-    }
-
+    };
 
     async changePassword(userId: string, dto: ChangePasswordDto) {
 
@@ -364,5 +362,5 @@ export class AuthService {
         });
 
         return { message: "Password changed successfully" };
-    }
+    };
 }

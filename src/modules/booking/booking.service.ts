@@ -19,7 +19,11 @@ export class BookingService {
             where: { eventId: dto.eventId },
         });
 
-        if (!event) throw new NotFoundException("Event not found😒");
+        if (!event) throw new NotFoundException("Event not found");
+
+        if (event.status === "COMPLITE") throw new BadRequestException("Event complited.");
+        if (event.status === "CANCELLED") throw new BadRequestException("Event canceled.");
+        if (event.status === "INACTIVE") throw new BadRequestException("Event not active.");
 
         const user = await this.prisma.user.findUnique({
             where: {
@@ -27,7 +31,7 @@ export class BookingService {
             }
         });
 
-        if (!user) throw new NotFoundException("User not found🙄")
+        if (!user) throw new NotFoundException("User not found");
 
         const calculationPrice = event.price;
         const totalPrice = calculationPrice * dto.quentity;

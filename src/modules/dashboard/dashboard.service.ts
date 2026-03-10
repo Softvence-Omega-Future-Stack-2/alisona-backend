@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BookingSlotStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -245,14 +246,37 @@ export class DashboardService {
     }
 
 
-    async bookingManagement(page: number = 1, limit: number = 10) {
+    async bookingManagement(
+        page: number = 1,
+        limit: number = 10,
+        search?: string,
+        status?: BookingSlotStatus
+    ) {
         const skip = (page - 1) * limit;
 
-        const totalBookings = await this.prisma.booking.count();
+        // Where clause
+        const whereClause: any = {};
+
+        if (status) {
+            whereClause.bookingConfarmStatus = status;
+        }
+
+        if (search) {
+            whereClause.OR = [
+                { fullName: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { phoneNumber: { contains: search, mode: 'insensitive' } },
+                { user: { username: { contains: search, mode: 'insensitive' } } },
+                { event: { name: { contains: search, mode: 'insensitive' } } },
+            ];
+        }
+
+        const totalBookings = await this.prisma.booking.count({ where: whereClause });
 
         const revenueAggregate = await this.prisma.booking.aggregate({
             where: {
                 status: "PAID",
+                ...whereClause,
             },
             _sum: {
                 price: true,
@@ -261,23 +285,17 @@ export class DashboardService {
 
         const totalRevenue = revenueAggregate._sum.price || 0;
 
-
         const bookings = await this.prisma.booking.findMany({
+            where: whereClause,
             skip,
             take: limit,
-            orderBy: {
-                createdAt: "desc",
-            },
+            orderBy: { createdAt: "desc" },
             include: {
                 user: {
-                    select: {
-                        userId: true,
-                        username: true,
-                        email: true,
-                    },
+                    select: { userId: true, username: true, email: true }
                 },
                 event: true
-            },
+            }
         });
 
         return {
@@ -291,7 +309,7 @@ export class DashboardService {
                 limit,
                 totalPages: Math.ceil(totalBookings / limit),
             },
-            data: bookings,
+            data: bookings
         };
     }
 

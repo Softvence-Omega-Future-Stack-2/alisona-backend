@@ -21,6 +21,28 @@ export class EventService {
         return event;
     };
 
+    async eventThumbnailUpdate(eventId: string, thumbnail: Express.Multer.File) {
+        const event = await this.prisma.event.findUnique({
+            where: {
+                eventId: eventId
+            }
+        });
+
+        if (!event) throw new NotFoundException("Evnet not found");
+
+        const image: any = await this.cloudinaryService.uploadImageFromBuffer(thumbnail.buffer, "thumbnail", `thumbnail-${Date.now()}-${Math.random()}`);
+
+        const update = await this.prisma.event.update({
+            where: {
+                eventId: eventId
+            },
+            data: {
+                thumbnail: image.secure_url
+            }
+        })
+
+    }
+
     async getAllEvent(page: number, limit: number, search?: string, category?: string, city?: string, minPrice?: number, maxPrice?: number, freeOnly?: boolean, familyFriendly?: boolean, upcoming?: boolean, status?: EventStatus) {
         const skip = (page - 1) * limit;
         const now = new Date();
