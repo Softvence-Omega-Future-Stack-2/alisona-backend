@@ -243,18 +243,11 @@ export class DashboardService {
             },
             data: users,
         };
-    }
+    };
 
-
-    async bookingManagement(
-        page: number = 1,
-        limit: number = 10,
-        search?: string,
-        status?: BookingSlotStatus
-    ) {
+    async bookingManagement(page: number = 1, limit: number = 10, search?: string, status?: BookingSlotStatus) {
         const skip = (page - 1) * limit;
 
-        // Where clause
         const whereClause: any = {};
 
         if (status) {
@@ -309,6 +302,6 @@ export class DashboardService {
             },
             data: bookings
         };
-    }
+    };
 
 }

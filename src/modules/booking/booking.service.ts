@@ -85,18 +85,33 @@ export class BookingService {
     }
 
 
-    async myBooking(userId: string) {
+    async myBooking(userId: string, page: number, limit: number) {
+
+        const skip = (page - 1) * limit;
+
+        const total = await this.prisma.booking.count({
+            where: { userId }
+        });
+
         const booking = await this.prisma.booking.findMany({
-            where: {
-                userId: userId
-            },
-            include: {
-                event: true
+            where: { userId },
+            include: { event: true },
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc"
             }
         });
 
-        return booking;
-
+        return {
+            meta: {
+                total,
+                page,
+                limit,
+                totalPage: Math.ceil(total / limit)
+            },
+            data: booking
+        };
     }
 
     async handleWebhookEvent(event: Stripe.Event) {

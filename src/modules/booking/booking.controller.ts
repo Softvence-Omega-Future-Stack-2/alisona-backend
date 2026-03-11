@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
-import { ApiBearerAuth, ApiBody, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { MakeBookingDto } from './dto/make.booking.dto';
 import Stripe from 'stripe';
@@ -25,10 +25,28 @@ export class BookingController {
 
     return {
       success: true,
-      message: `Congratulations, ${result.user.username}! Your booking of ${dto.quentity} seat(s) for ${result.event.title} was successful.`,
       clientSrcrate: result.url
     }
 
+  }
+
+
+  @Get("my-booking")
+  @ApiOperation({ summary: "My All Booking" })
+  @ApiBearerAuth()
+  @ApiQuery({ name: "page", required: false, example: 1, description: "Page number" })
+  @ApiQuery({ name: "limit", required: false, example: 10, description: "Number of bookings per page" })
+  @UseGuards(AuthGuard("jwt"))
+  async myBooking(@Req() req: any, @Query("page") page: number = 1, @Query("limit") limit: number = 10) {
+
+    const userId = req.user.userId;
+
+    const result = await this.bookingService.myBooking(userId, Number(page), Number(limit));
+
+    return {
+      success: true,
+      ...result
+    };
   }
 
 
