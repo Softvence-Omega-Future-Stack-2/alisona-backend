@@ -7,6 +7,7 @@ import Stripe from 'stripe';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { Roles } from 'src/Decorator/roles.decorator';
+import { BookingSlotStatus, bookingStatus } from '@prisma/client';
 
 @Controller('booking')
 export class BookingController {
@@ -34,14 +35,45 @@ export class BookingController {
   @Get("my-booking")
   @ApiOperation({ summary: "My All Booking" })
   @ApiBearerAuth()
-  @ApiQuery({ name: "page", required: false, example: 1, description: "Page number" })
-  @ApiQuery({ name: "limit", required: false, example: 10, description: "Number of bookings per page" })
+
+  @ApiQuery({
+    name: "page",
+    required: false,
+    example: 1
+  })
+
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    example: 10
+  })
+
+  @ApiQuery({
+    name: "status",
+    enum: bookingStatus,
+    required: false,
+    description: "Filter by booking status"
+  })
+
+  @ApiQuery({
+    name: "bookingConfarmStatus",
+    enum: BookingSlotStatus,
+    required: false,
+    description: "Filter by confirm status"
+  })
+
   @UseGuards(AuthGuard("jwt"))
-  async myBooking(@Req() req: any, @Query("page") page: number = 1, @Query("limit") limit: number = 10) {
+  async myBooking(
+    @Req() req: any,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10,
+    @Query("status") status?: bookingStatus,
+    @Query("bookingConfarmStatus") bookingConfarmStatus?: BookingSlotStatus
+  ) {
 
     const userId = req.user.userId;
 
-    const result = await this.bookingService.myBooking(userId, Number(page), Number(limit));
+    const result = await this.bookingService.myBooking(userId, Number(page), Number(limit), status, bookingConfarmStatus);
 
     return {
       success: true,
