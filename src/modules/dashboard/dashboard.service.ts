@@ -265,9 +265,7 @@ export class DashboardService {
             whereClause.OR = [
                 { fullName: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
-                { phoneNumber: { contains: search, mode: 'insensitive' } },
-                { user: { username: { contains: search, mode: 'insensitive' } } },
-                { event: { name: { contains: search, mode: 'insensitive' } } },
+                { phoneNumber: { contains: search, mode: 'insensitive' } }
             ];
         }
 
