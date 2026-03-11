@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { MakeBookingDto } from './dto/make.booking.dto';
 import { StripeService } from 'src/stripe/stripe.service';
 import Stripe from 'stripe';
-import { BookingSlotStatus } from '@prisma/client';
+import { BookingSlotStatus, bookingStatus } from '@prisma/client';
 
 @Injectable()
 export class BookingService {
@@ -85,17 +85,31 @@ export class BookingService {
     }
 
 
-    async myBooking(userId: string, page: number, limit: number) {
+    async myBooking(userId: string, page: number, limit: number, status?: bookingStatus, bookingConfarmStatus?: BookingSlotStatus) {
 
         const skip = (page - 1) * limit;
 
+        const whereCondition: any = {
+            userId
+        };
+
+        if (status) {
+            whereCondition.status = status;
+        }
+
+        if (bookingConfarmStatus) {
+            whereCondition.bookingConfarmStatus = bookingConfarmStatus;
+        }
+
         const total = await this.prisma.booking.count({
-            where: { userId }
+            where: whereCondition
         });
 
         const booking = await this.prisma.booking.findMany({
-            where: { userId },
-            include: { event: true },
+            where: whereCondition,
+            include: {
+                event: true
+            },
             skip,
             take: limit,
             orderBy: {
